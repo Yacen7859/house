@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NyumbaDirectly — Find Verified Houses, No Agent Fees</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1a7a4a;
+    --green-light: #2db56e;
+    --green-pale: #e8f7ef;
+    --orange: #f4722b;
+    --dark: #0d1f15;
+    --mid: #1e3a28;
+    --text: #f0f5f2;
+    --muted: #8aad97;
+    --white: #ffffff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 2rem;
+    background: rgba(13,31,21,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(45,181,110,0.15);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.4rem;
+    color: var(--green-light);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--orange); }
+  nav a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.9rem; font-weight: 500;
+    margin-left: 2rem;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--green-light); color: var(--dark) !important;
+    padding: 0.5rem 1.2rem; border-radius: 50px;
+    font-weight: 600 !important;
+  }
+  .nav-cta:hover { background: var(--orange); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -30%; right: -20%;
+    width: 60vw; height: 60vw;
+    background: radial-gradient(circle, rgba(26,122,74,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -20%; left: -10%;
+    width: 40vw; height: 40vw;
+    background: radial-gradient(circle, rgba(244,114,43,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 900px; margin: 0 auto; text-align: center; position: relative; z-index: 1;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(45,181,110,0.15);
+    border: 1px solid rgba(45,181,110,0.3);
+    color: var(--green-light);
+    font-size: 0.8rem; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 0.4rem 1rem; border-radius: 50px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--green-light);
+  }
+  .hero h1 .strike {
+    text-decoration: line-through;
+    color: var(--muted);
+    opacity: 0.6;
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--muted);
+    max-width: 600px; margin: 0 auto 2.5rem;
+    line-height: 1.7;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-btns {
+    display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--green-light); color: var(--dark);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1rem;
+    padding: 0.9rem 2.2rem; border-radius: 50px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--orange); transform: translateY(-2px); }
+  .btn-outline {
+    background: transparent; color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600; font-size: 1rem;
+    padding: 0.9rem 2.2rem; border-radius: 50px;
+    text-decoration: none; border: 1.5px solid rgba(255,255,255,0.2);
+    cursor: pointer; transition: border-color 0.2s, transform 0.2s;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--green-light); transform: translateY(-2px); }
+
+  /* ── STATS ── */
+  .stats {
+    display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;
+    padding: 3rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.5rem; font-weight: 800;
+    color: var(--green-light);
+    line-height: 1;
+  }
+  .stat-label { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+
+  /* ── PROBLEM ── */
+  .section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--orange); font-weight: 600; margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800; letter-spacing: -1px;
+    line-height: 1.1; margin-bottom: 1.5rem;
+  }
+
+  .pain-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .pain-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 1.8rem;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .pain-card:hover { border-color: rgba(244,114,43,0.4); transform: translateY(-4px); }
+  .pain-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .pain-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  .pain-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── HOW IT WORKS ── */
+  .how-bg {
+    background: var(--mid);
+    border-top: 1px solid rgba(45,181,110,0.1);
+    border-bottom: 1px solid rgba(45,181,110,0.1);
+  }
+  .flow-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4rem; align-items: start; margin-top: 3rem;
+  }
+  @media (max-width: 700px) { .flow-grid { grid-template-columns: 1fr; } }
+
+  .flow-col h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--green-light); margin-bottom: 1.5rem;
+    letter-spacing: 0.5px;
+  }
+  .flow-step {
+    display: flex; gap: 1rem; margin-bottom: 1.5rem;
+    align-items: flex-start;
+  }
+  .step-num {
+    min-width: 36px; height: 36px;
+    background: var(--green-pale);
+    color: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 0.9rem;
+  }
+  .step-text h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600; font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+  }
+  .step-text p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── TRUST ── */
+  .trust-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .trust-card {
+    background: linear-gradient(135deg, rgba(26,122,74,0.15), rgba(26,122,74,0.05));
+    border: 1px solid rgba(45,181,110,0.2);
+    border-radius: 16px; padding: 1.8rem;
+    text-align: center;
+  }
+  .trust-card .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+  .trust-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem;
+  }
+  .trust-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .price-card {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 2.5rem 2rem;
+    transition: border-color 0.3s;
+  }
+  .price-card.featured {
+    border-color: var(--green-light);
+    background: rgba(45,181,110,0.07);
+    position: relative; overflow: hidden;
+  }
+  .price-card.featured::before {
+    content: 'POPULAR';
+    position: absolute; top: 1.2rem; right: -2rem;
+    background: var(--green-light); color: var(--dark);
+    font-size: 0.65rem; font-weight: 800; letter-spacing: 1.5px;
+    padding: 0.25rem 3rem;
+    transform: rotate(45deg); transform-origin: center;
+  }
+  .price-card h3 {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  .price-amount {
+    font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800;
+    color: var(--green-light); line-height: 1; margin: 1rem 0 0.3rem;
+  }
+  .price-period { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .price-features { list-style: none; }
+  .price-features li {
+    font-size: 0.9rem; color: var(--muted);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .price-features li::before { content: '✓'; color: var(--green-light); font-weight: 700; }
+  .price-features li.no::before { content: '✗'; color: rgba(255,255,255,0.2); }
+  .price-features li.no { color: rgba(255,255,255,0.2); }
+
+  /* ── CTA ── */
+  .cta-section {
+    text-align: center;
+    padding: 6rem 2rem;
+    background: linear-gradient(135deg, var(--mid) 0%, var(--dark) 100%);
+    position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(26,122,74,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800; letter-spacing: -1px;
+    margin-bottom: 1rem; position: relative;
+  }
+  .cta-section p {
+    color: var(--muted); max-width: 500px; margin: 0 auto 2.5rem;
+    font-size: 1.05rem; line-height: 1.7;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: var(--muted); font-size: 0.85rem;
+  }
+  footer span { color: var(--green-light); }
+
+  /* ── ANIMATION ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SEARCH BAR ── */
+  .search-bar {
+    display: flex; gap: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 60px; overflow: hidden;
+    max-width: 520px; margin: 2.5rem auto 0;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .search-bar input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; padding: 1rem 1.5rem;
+  }
+  .search-bar input::placeholder { color: var(--muted); }
+  .search-bar button {
+    background: var(--green-light); border: none; cursor: pointer;
+    color: var(--dark); font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.9rem;
+    padding: 0 1.8rem; border-radius: 0 60px 60px 0;
+    transition: background 0.2s;
+  }
+  .search-bar button:hover { background: var(--orange); }
+
+  /* Divider arrow */
+  .arrow-divider { text-align: center; padding: 0.5rem; color: var(--muted); font-size: 1.5rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Nyumba<span>Directly</span></div>
+  <div>
+    <a href="#how">How it works</a>
+    <a href="#trust">Trust</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#cta" class="nav-cta">List Your House</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🇰🇪 Built for Kenya — Nairobi First</div>
+    <h1>Find a Verified House.<br><em>Zero Agent Fees.</em><br><span class="strike">No Middlemen.</span></h1>
+    <p class="hero-sub">Connect directly with landlords. Every listing is physically verified. No fake photos, no viewing fee nonsense, no agents taking your money.</p>
+    <div class="hero-btns">
+      <a href="#listings" class="btn-primary">Browse Houses</a>
+      <a href="#pricing" class="btn-outline">List Your Property →</a>
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search by estate, e.g. Rongai, Ngong Road…">
+      <button>Search</button>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">0</div>
+    <div class="stat-label">Agent fees for tenants</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">Listings physically verified</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">KES 0</div>
+    <div class="stat-label">Viewing fee charged</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">Direct</div>
+    <div class="stat-label">Tenant ↔ Landlord contact</div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="section">
+  <p class="section-label">The Problem</p>
+  <h2 class="section-title">The rental market<br>is broken. Here's how.</h2>
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-icon">📸</div>
+      <h3>Fake Listings</h3>
+      <p>Stock photos of houses that don't exist. You show up and there's nothing there.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">💸</div>
+      <h3>Viewing Fees</h3>
+      <p>Agents charging you just to see a house. Even if you don't take it.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">🤥</div>
+      <h3>"Near the Stage"</h3>
+      <p>Vague locations that turn out to be a 40-minute walk. No real address, no map.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">📞</div>
+      <h3>Agent Middlemen</h3>
+      <p>You pay them. Landlord pays them. Both of you get less value. They do little.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-bg" id="how">
+  <div class="section">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title">Simple. Verified. Direct.</h2>
+    <div class="flow-grid">
+      <div class="flow-col">
+        <h3>🏠 For Landlords</h3>
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h4>Register with ID + Phone</h4>
+            <p>Quick sign-up. We verify your identity so tenants can trust you.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h4>Create Your Listing</h4>
+            <p>Add rent, deposit, real photos, and your exact location on a map.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h4>We Verify Physically</h4>
+            <p>Our team or a trusted local rep confirms the house is real and matches photos.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <h4>Go Live & Get Tenants</h4>
+            <p>Verified badge added. Tenants contact you directly — no agent fees taken.</p>
+          </div>
+        </div>
+      </div>
+      <div class="flow-col">
+        <h3>🔍 For Tenants</h3>
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h4>Search Your Area</h4>
+            <p>Filter by location, rent range, and house type. All free, no sign-up needed.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h4>See Verified Listings Only</h4>
+            <p>Every listing shows real photos, exact location on map, and verification date.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h4>Contact Landlord Directly</h4>
+            <p>Call or WhatsApp the landlord. No agent. No viewing fee. Just arrange a visit.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <h4>Move In</h4>
+            <p>Negotiate directly. Agree terms. You saved what would have gone to an agent.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="section" id="trust">
+  <p class="section-label">Trust System</p>
+  <h2 class="section-title">Trust is the product.<br>Not features.</h2>
+  <div class="trust-grid">
+    <div class="trust-card">
+      <div class="icon">✅</div>
+      <h3>Verified Badge</h3>
+      <p>Every listing is physically inspected before going live. No exceptions.</p>
+    </div>
+    <div class="trust-card">
+      <div class="icon">📅</div>
+      <h3>Last Verified Date</h3>
+      <p>You see exactly when the house was last checked. Old listings get flagged.</p>
+    </div>
+    <div class="trust-card">
+      <div class="icon">📷</div>
+      <h3>Real Photos Only</h3>
+      <p>Stock images are rejected. Photos must match the actual house at the actual address.</p>
+    </div>
+    <div class="trust-card">
+      <div class="icon">🚩</div>
+      <h3>Report a Listing</h3>
+      <p>One-tap reporting. Suspicious listing? We investigate within 24 hours.</p>
+    </div>
+    <div class="trust-card">
+      <div class="icon">📍</div>
+      <h3>Exact Location</h3>
+      <p>Real GPS pin on the map. Not "near stage". Not "5 mins from tao". Exactly here.</p>
+    </div>
+    <div class="trust-card">
+      <div class="icon">🔒</div>
+      <h3>No Fake Agents</h3>
+      <p>Agents can only list if registered, and cannot charge tenants. Most won't qualify.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="how-bg" id="pricing">
+  <div class="section">
+    <p class="section-label">Pricing</p>
+    <h2 class="section-title">Tenants pay zero.<br>Landlords pay fairly.</h2>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Per Listing</h3>
+        <div class="price-amount">KES 500</div>
+        <p class="price-period">one-time per listing</p>
+        <ul class="price-features">
+          <li>Physical verification included</li>
+          <li>Verified badge on listing</li>
+          <li>Direct tenant contact</li>
+          <li>Listed until house is taken</li>
+          <li class="no">Featured placement</li>
+          <li class="no">Analytics dashboard</li>
+        </ul>
+      </div>
+      <div class="price-card featured">
+        <h3>Monthly Subscription</h3>
+        <div class="price-amount">KES 3,000</div>
+        <p class="price-period">per month, unlimited listings</p>
+        <ul class="price-features">
+          <li>Unlimited verified listings</li>
+          <li>Priority verification turnaround</li>
+          <li>Featured listing placement</li>
+          <li>Analytics dashboard</li>
+          <li>Dedicated support</li>
+          <li>Best for landlords with 3+ units</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <h3>Featured Boost</h3>
+        <div class="price-amount">KES 1,000</div>
+        <p class="price-period">per listing, 14-day boost</p>
+        <ul class="price-features">
+          <li>Top of search results</li>
+          <li>Highlighted badge</li>
+          <li>2–3× more views typical</li>
+          <li>Works with per-listing or sub</li>
+          <li class="no">Includes verification</li>
+          <li class="no">Includes analytics</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <h2>Ready to find a house<br>the honest way?</h2>
+  <p>Join the platform that puts tenants and landlords first — not agents.</p>
+  <div class="hero-btns" style="position:relative;">
+    <a href="#listings" class="btn-primary">Browse Listings — Free</a>
+    <a href="#pricing" class="btn-outline">List Your Property</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 <span>NyumbaDirectly</span> — Built for Kenya 🇰🇪 | Nairobi West · Rongai · Thika Road · Coming soon everywhere</p>
+</footer>
+
+</body>
+</html>
